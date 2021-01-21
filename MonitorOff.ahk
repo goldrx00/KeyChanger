@@ -5,6 +5,7 @@ SetBatchLines, -1 ; 스크립트 최고속도로
 
 
 Menu, Tray, Add , 로그보기
+Menu, Tray, Add , 모니터끄기
 
 Gui, Add, ListBox, x10 y+10 w350 h200 vLogList,
 ;Gui, Show
@@ -14,14 +15,16 @@ return
     Gui, Show
 return
 
+모니터끄기:
 ScrollLock::
-    MonitOff(MonitVar) ;hotkey to toggle the monitor on and off 
+    ;MonitOff(MonitVar) ;hotkey to toggle the monitor on and off
+    SendMessage,0x112,0xF170,2,,Program Manager
 return
 
 ; Ctrl+M키를 누르면 모니터가 꺼진다. 다시 단축키를 눌러야만 모니터가 켜진다.
 
 
-
+;한번 누르면 모니터 꺼진채로 유지하고 다시 누르면 켜짐
 MonitOff(ByRef x) {
     SetTimer, MonitOffLabel, % (x:=!x) ? "1000" : "Off" ;toggle the var and turn the timer on or off
     If(x) { ;if it turned on turn monitor off
