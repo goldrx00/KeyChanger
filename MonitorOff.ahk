@@ -3,9 +3,10 @@
 #NoEnv ;변수명을 해석할 때, 환경 변수를 무시한다 (속도 상승)
 SetBatchLines, -1 ; 스크립트 최고속도로
 
-
+Menu, Tray, Icon, icon.ico
 Menu, Tray, Add , 로그보기
 Menu, Tray, Add , 모니터끄기
+Menu, Tray, Add , 화면잠금
 
 Gui, Add, ListBox, x10 y+10 w350 h200 vLogList,
 ;Gui, Show
@@ -42,8 +43,9 @@ MonitOff(ByRef x) {
 }
 
 
-;화면잠금
-;Run rundll32.exe user32.dll`,LockWorkStation ;Windows key + L 
+화면잠금:
+Run rundll32.exe user32.dll`,LockWorkStation ;Windows key + L 
+return
 
 ;모니터끄기
 ;SendMessage,0x112,0xF170,2,,Program Manager ; Ctrl+o키를 누르면 모니터가 꺼지고 아무 키 입력이나 마우스로 움직이면 모니터가 켜진다.
