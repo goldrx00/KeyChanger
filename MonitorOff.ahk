@@ -4,13 +4,29 @@
 SetBatchLines, -1 ; 스크립트 최고속도로
 
 Menu, Tray, Icon, icon.ico
+
+Menu, Tray, DeleteAll
 Menu, Tray, Add , 로그보기
 Menu, Tray, Add , 모니터끄기
 Menu, Tray, Add , 화면잠금
 
+
 Gui, Add, ListBox, x10 y+10 w350 h200 vLogList,
+
+global 잠금시간 := 20
+loop,
+{
+    addlog("Timeidle: " A_TimeIdle)
+    if(A_TimeIdle > 60000*잠금시간)
+    {
+        화면잠금()
+    }
+    sleep, 60000*5
+}
 ;Gui, Show
 return
+
+^2::Menu, mymenu, Show 
 
 로그보기:
     Gui, Show
@@ -22,12 +38,10 @@ ScrollLock::
     SendMessage,0x112,0xF170,2,,Program Manager
 return
 
-; Ctrl+M키를 누르면 모니터가 꺼진다. 다시 단축키를 눌러야만 모니터가 켜진다.
-
 
 ;한번 누르면 모니터 꺼진채로 유지하고 다시 누르면 켜짐
 MonitOff(ByRef x) {
-    SetTimer, MonitOffLabel, % (x:=!x) ? "1000" : "Off" ;toggle the var and turn the timer on or off
+    SetTimer, MonitOffLabel, % (x:=!x) ? "500" : "Off" ;toggle the var and turn the timer on or off
     If(x) { ;if it turned on turn monitor off
         SendMessage,0x112,0xF170,2,,Program Manager
     }
@@ -42,13 +56,18 @@ MonitOff(ByRef x) {
     Return
 }
 
-
-화면잠금:
-Run rundll32.exe user32.dll`,LockWorkStation ;Windows key + L 
-return
+화면잠금()
+{
+    Run rundll32.exe user32.dll`,LockWorkStation ;Windows key + L 
+    return
+}
 
 ;모니터끄기
 ;SendMessage,0x112,0xF170,2,,Program Manager ; Ctrl+o키를 누르면 모니터가 꺼지고 아무 키 입력이나 마우스로 움직이면 모니터가 켜진다.
+
+
+;101키 키보드의 오른쪽 한자키 컨트롤키로 맵핑
+SC11D:: RCtrl
 
 
 global nLog := 1 ;;기록
