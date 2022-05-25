@@ -17,11 +17,9 @@ Menu, Tray, Add , 화면잠금
 
 Gui, Add, ListBox, x10 y+10 w350 h200 vLogList,
 
-;32비트 ahk로 64비트 cmd 또는 powershell을 사용하려면 가상의 sysnative 폴더로 사용
-;https://github.com/Microsoft/WSL/issues/1105
-Run, C:\Windows\sysnative\cmd.exe /c wsl_auto_service.bat,, hide
-;wsl2 자동 포트포워딩
-Run, C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy remotesigned ./ports_wsl.ps1 ,, hide
+;sleep, 10000
+
+SetTimer, wsl_auto, -30000 ;시간 음수로 하면 한번만 실행하고 꺼짐
 
 SetFormat, Float, 0.2
 
@@ -108,6 +106,19 @@ curl()
   
 }
 
+wsl_auto()
+{
+    ;32비트 ahk로 64비트 cmd 또는 powershell을 사용하려면 가상의 sysnative 폴더로 사용
+    ;https://github.com/Microsoft/WSL/issues/1105
+    Run, C:\Windows\sysnative\cmd.exe /c wsl_auto_service.bat,, hide
+    ;Run, wsl_auto_service.bat,,
+    addlog("wsl_auto_service")
+    ;wsl2 자동 포트포워딩
+    Run, C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy remotesigned ./ports_wsl.ps1 ,, hide
+    addlog("wsl 포트포워딩 완료")
+}
+
+
 ;101키 키보드의 오른쪽 한자키 컨트롤키로 맵핑
 SC11D:: RCtrl
 
@@ -124,21 +135,6 @@ AddLog(String) ;;애드로그
 	Gui,  Font, S8 CDefault, Verdana
 }
 
-^f9::
-    ; AddLog("zzzz")
-    ; ; shell := ComObjCreate("WScript.Shell")
-    ; ; exec := shell.Exec(ComSpec " /c " "wsl sudo service ssh start")
-    ; ; ret := exec.StdOut.ReadAll()
-    ; ;run, bash.exe
-    ; ;Run, wsl.exe -d ubuntu -e “cd ~”
-    ; ;run, C:\Users\goldrx89\Desktop\monitor.bat
-    ; ;Run, powershell /c wsl_auto_service.bat , , ;hide
-    ; ;Run, wsl_auto_service.bat
-    ; Run, C:\Windows\sysnative\cmd.exe /c wsl_auto_service.bat ;https://github.com/Microsoft/WSL/issues/1105    
-    ; Run, C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Unrestricted ./ports_wsl.ps1,, ;hide
-    ; ;Run, ports_wsl.ps1 -ExecutionPolicy Unrestricted
-    ; AddLog("kkkk")
-return
 
 ; ^f4::
 ;     Hibernate( A_Now, 60, "Seconds" )
@@ -163,3 +159,4 @@ Hibernate(T="", O=0,  U="H" ){ ; by SKAN  www.autohotkey.com/forum/viewtopic.php
 ; Hibernate( A_Now, 30, "Minutes" )
 ; Hibernate( A_Now, 2, "Hours" ) or Hibernate( Null, 2 )
 ; Hibernate( A_Now, 7, "Days" )
+
