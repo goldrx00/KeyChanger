@@ -1,5 +1,7 @@
 ﻿;; 윈도우 작업스케줄러에 계정 adminstrators에 가장 높은 권한으로 실행함.
 
+;키체인저 테스트
+;ㅁㄴㅇㄹ
 
 #Persistent ;핫키를 포함하지 않는 스크립트도 꺼지지 않게 한다
 #SingleInstance Force ; 스크립트를 동시에 한개만 실행
