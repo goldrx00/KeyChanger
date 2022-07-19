@@ -110,9 +110,9 @@ wsl_auto()
 {
     ;32비트 ahk로 64비트 cmd 또는 powershell을 사용하려면 가상의 sysnative 폴더로 사용
     ;https://github.com/Microsoft/WSL/issues/1105
-    Run, C:\Windows\sysnative\cmd.exe /c wsl_auto_service.bat,, hide
+    ;Run, C:\Windows\sysnative\cmd.exe /c wsl_auto_service.bat,, hide
     ;Run, wsl_auto_service.bat,,
-    addlog("wsl_auto_service")
+    ;addlog("wsl_auto_service")
     ;wsl2 자동 포트포워딩
     Run, C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy remotesigned ./ports_wsl.ps1 ,, hide
     addlog("wsl 포트포워딩 완료")
@@ -141,16 +141,19 @@ AddLog(String) ;;애드로그
    
 ; return
 
-
 Hibernate(T="", O=0,  U="H" ){ ; by SKAN  www.autohotkey.com/forum/viewtopic.php?t=50733
-    T += %O%,%U%                
-    EnvSub, T, 16010101, S
-    VarSetCapacity(FT,8), DllCall( "LocalFileTimeToFileTime", Int64P,T:=T*10000000,UInt,&FT )
-    If hTmr := DllCall( "CreateWaitableTimer", UInt,0, UInt,0, UInt,0 )
-    If DllCall( "SetWaitableTimer", UInt,hTmr, UInt,&FT, UInt,1000, Int,0, Int,0, UInt,1 )
-    If DllCall( "PowrProf\SetSuspendState", UInt,1, UInt,0, UInt,0 )
-    DllCall( "WaitForSingleObject", UInt,hTmr,Int,-1 ), DllCall( "CloseHandle",UInt,hTmr )
-    Return A_LastError
+   T += %O%,%U%                
+   EnvSub, T, 16010101, S
+   VarSetCapacity(FT,8), DllCall( "LocalFileTimeToFileTime", Int64P,T:=T*10000000,UInt,&FT )
+   If hTmr := DllCall( "CreateWaitableTimer", UInt,0, UInt,0, UInt,0 ) ;예약타이머 생성
+   If DllCall( "SetWaitableTimer", UInt,hTmr, UInt,&FT, UInt,1000, Int,0, Int,0, UInt,1 ) ;예약타이머 세팅
+   ;If DllCall( "PowrProf\SetSuspendState", UInt, 0, UInt,0, UInt,0 )  ;절전모드
+   If DllCall( "PowrProf\SetSuspendState", UInt,1, UInt,0, UInt,0 ) ;최대절전모드
+   {
+      ;DllCall( "WaitForSingleObject", UInt,hTmr,Int,-1 ) ;대기시간동안 오토핫키 멈추게 하는 명령어
+      DllCall( "CloseHandle",UInt,hTmr )  ;핸들 클로즈함과 동시에 예약도 사라짐
+   }
+   Return A_LastError
 }
 
 ; Examples:
@@ -160,3 +163,13 @@ Hibernate(T="", O=0,  U="H" ){ ; by SKAN  www.autohotkey.com/forum/viewtopic.php
 ; Hibernate( A_Now, 2, "Hours" ) or Hibernate( Null, 2 )
 ; Hibernate( A_Now, 7, "Days" )
 
+; ^f9::
+; Run, C:\Windows\sysnative\DisplaySwitch.exe /internal
+
+; return
+
+
+; For the PC screen only: %windir%\System32\DisplaySwitch.exe /internal
+; For Duplicate: %windir%\System32\DisplaySwitch.exe /clone
+; For Extend: %windir%\System32\DisplaySwitch.exe /extend
+; For Second screen only: %windir%\System32\DisplaySwitch.exe /external
