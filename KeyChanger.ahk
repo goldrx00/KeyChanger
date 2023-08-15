@@ -58,17 +58,21 @@ loop,
         ||(MySlider = 2 && A_TimeIdle > 1분*60)
         ||(MySlider = 3 && A_TimeIdle > 1분*120))
     {
-        ;addlog("절전모드: "A_TimeIdle)
+        addlog("절전모드: "A_TimeIdle)
         절전모드()
         sleep, 20000
         MouseMove, 0,0,0,R
         MouseMove, 0,0,0,R
     }
+    addlog(A_TimeIdle)
+    MouseMove, 0,0,0,R
+    ; A_TimeIdle := 0
 
     timeidle_sec := A_TimeIdle/1000
     Run, %mosquitto% -h 192.168.0.51 -t desktop/timeidle -u goldrx89 -P nukeqbc -m %timeidle_sec%, , hide
 
-    sleep, 1분
+    ; sleep, 1분
+    sleep, 5000
 }
 ;Gui, Show
 return
@@ -164,10 +168,10 @@ wsl_auto()
 
         WinGetTitle, Title, ahk_id %hWnd%
         ; addlog(Title)
-        IfInString, Title, 애드벌룬 상세내역
-            continue
-        IfInString, Title, 모바일 게임
-            continue
+        ; IfInString, Title, 애드벌룬 상세내역
+        ;     continue
+        ; IfInString, Title, 모바일 게임
+        ;     continue
         IfInString, Title, TradingView
             continue
 
@@ -176,7 +180,8 @@ wsl_auto()
         sleep, 100
         PixelGetColor, color, 95, 11
         addlog(color)
-        if (color = 0xC5750C)
+        ;if (color = 0xC5750C)  ;296EEB
+        if (color = 0xEB6E29) ;296EEB
         {
             ControlClick, x67 y20, ahk_id %hWnd%,,,, NA
         }
@@ -193,8 +198,61 @@ wsl_auto()
     addlog("탭숨기기")
 }
 
+채굴옮기기()
+{
+    WinGet, hWnd, , ahk_exe vivaldi.exe
+    ; addlog(hWndList)
+    WinMove, ahk_id %hWnd% , , 100, 100
+
+    ; Loop, % hWndList ;.Length()
+    ; {
+    ;     hWnd := hWndList%A_Index%
+    ;     ; addlog(hWnd)
+
+    ;     WinGetTitle, Title, ahk_id %hWnd%
+    ;     ; addlog(Title)
+    ;     IfInString, Title, 모바일 게임
+    ;     {
+    ;         WinMove, ahk_id %hWnd% , , 100, 100,
+    ;     }
+    ;     sleep, 100
+    ; }
+    ; ControlClick, x50 y20, ahk_id %hWndList1% ;다시 처음창으로
+
+    addlog("채굴옮기기")
+}
+
 ;101키 키보드의 오른쪽 한자키 컨트롤키로 맵핑
-SC11D:: RCtrl
+; SC11D:: RCtrl
+
+#IfWinActive ahk_exe WsaClient.exe
+    ^Space::
+        {
+            ret:=IME_CHECK("ahk_exe WsaClient.exe")
+            If ret=0 ;;영문
+            {
+                ; Send, {vk15sc138}
+            }
+            If ret=1 ;;한글
+            {
+                Send, {vk15sc138}
+            }
+        }
+    return
+
+    sc138::
+        {
+            addlog("한영")
+            Send, {ShiftDown}{Space}{ShiftUp} ;;한영키
+        }
+    return
+
+#IfWinActive
+
+; 컨트롤 + 스페이스를 한영키로
+^Space:: Send, {vk15sc138}
+
+; +Space:: SC1F2
 
 global nLog := 1 ;;기록
 AddLog(String) ;;애드로그
@@ -231,13 +289,35 @@ Hibernate(T="", O=0, U="H" ){ ; by SKAN  www.autohotkey.com/forum/viewtopic.php?
 ; Hibernate( A_Now, 2, "Hours" ) or Hibernate( Null, 2 )
 ; Hibernate( A_Now, 7, "Days" )
 
+;;;한영체크 함수
+IME_CHECK(WinTitle)
+{
+    WinGet,hWnd,ID,%WinTitle%
+    Return Send_ImeControl(ImmGetDefaultIMEWnd(hWnd),0x005,"")
+}
+
+Send_ImeControl(DefaultIMEWnd, wParam, lParam)
+{
+    DetectSave := A_DetectHiddenWindows
+    DetectHiddenWindows,ON
+    SendMessage 0x283, wParam,lParam,,ahk_id %DefaultIMEWnd%
+    if (DetectSave <> A_DetectHiddenWindows)
+        DetectHiddenWindows,%DetectSave%
+    return ErrorLevel
+}
+
+ImmGetDefaultIMEWnd(hWnd)
+{
+    return DllCall("imm32\ImmGetDefaultIMEWnd", Uint,hWnd, Uint)
+}
+
 ^f4::
     탭숨기기()
 return
 
-; ^f5::
-
-; return
+^f5::
+    채굴옮기기()
+return
 
 ; ^f9::
 ;     절전모드()
