@@ -31,7 +31,9 @@ Gui, Add, Text,x+65, 2시간
 
 ;sleep, 10000
 
-SetTimer, wsl_auto, -30000 ;시간 음수로 하면 한번만 실행하고 꺼짐
+; SetTimer, wsl_auto, -30000 ;시간 음수로 하면 한번만 실행하고 꺼짐
+
+Run, iperf3\iperf3.exe -s, , Hide
 
 SetFormat, Float, 0.2
 
@@ -54,25 +56,29 @@ loop,
     }
 
     Gui, Submit, Nohide
-    if ((MySlider = 1 && A_TimeIdle > 1분*25)
+    if ((MySlider = 1 && A_TimeIdle > 1분*30)
         ||(MySlider = 2 && A_TimeIdle > 1분*60)
         ||(MySlider = 3 && A_TimeIdle > 1분*120))
     {
         addlog("절전모드: "A_TimeIdle)
+        ; MouseMove, 0,0,0,R
         절전모드()
         sleep, 20000
-        MouseMove, 0,0,0,R
-        MouseMove, 0,0,0,R
+        ; MouseMove, 0,0,0,R
+        ; msg:= "절전모드해제"
+        ; RunWait, curl -k -d "chat_id=857175800&text=%msg%" https://api.telegram.org/bot802319057:AAF2_2iNBUEJ0lJlR5TnWrE82OxlFu5pJwY/sendMessage,, Hide
+
     }
     addlog(A_TimeIdle)
-    MouseMove, 0,0,0,R
     ; A_TimeIdle := 0
+    ; addlog("a_tickcount: " A_TickCount)
 
     timeidle_sec := A_TimeIdle/1000
     Run, %mosquitto% -h 192.168.0.51 -t desktop/timeidle -u goldrx89 -P nukeqbc -m %timeidle_sec%, , hide
 
-    ; sleep, 1분
-    sleep, 5000
+    sleep, 50000
+    sleep, 10000
+    ; sleep, 5000
 }
 ;Gui, Show
 return
@@ -178,12 +184,13 @@ wsl_auto()
         WinGet, minmax, MinMax, ahk_id %hWnd%
         WinActivate, ahk_id %hWnd%
         sleep, 100
-        PixelGetColor, color, 95, 11
+        PixelGetColor, color, 111, 12
+        PixelGetColor, color2, 111, 14
         addlog(color)
         ;if (color = 0xC5750C)  ;296EEB
-        if (color = 0xEB6E29) ;296EEB
+        if (color = 0xEB6E29 || color2 = 0xEB6E29) ;296EEB
         {
-            ControlClick, x67 y20, ahk_id %hWnd%,,,, NA
+            ControlClick, x80 y20, ahk_id %hWnd%,,,, NA
         }
 
         if (minmax = -1)
@@ -222,35 +229,48 @@ wsl_auto()
     addlog("채굴옮기기")
 }
 
-;101키 키보드의 오른쪽 한자키 컨트롤키로 맵핑
-; SC11D:: RCtrl
-
-#IfWinActive ahk_exe WsaClient.exe
-    ^Space::
-        {
-            ret:=IME_CHECK("ahk_exe WsaClient.exe")
-            If ret=0 ;;영문
-            {
-                ; Send, {vk15sc138}
-            }
-            If ret=1 ;;한글
-            {
-                Send, {vk15sc138}
-            }
-        }
-    return
-
-    sc138::
-        {
-            addlog("한영")
-            Send, {ShiftDown}{Space}{ShiftUp} ;;한영키
-        }
-    return
-
+;팟플레이어 켜져있을 때 101키 키보드의 오른쪽 한자키 컨트롤키로 맵핑
+#IfWinActive ahk_class PotPlayer64
+    SC11D:: RCtrl
 #IfWinActive
 
+; #IfWinActive ahk_exe GenshinImpact.exe
+; ; 1::Send, {Esc} ;;원신에선 안먹는것 같음
+; #IfWinActive
+
 ; 컨트롤 + 스페이스를 한영키로
-^Space:: Send, {vk15sc138}
+; ^Space:: Send, {vk15sc138}
+
+; wsa 아닐 때만 쉬프트 스페이스 한영키로 변경
+#IfWinNotActive ahk_exe WsaClient.exe
+    +Space:: Send, {vk15sc138}
+#IfWinNotActive
+
+;wsa 활성화 일때만 한영키 쉬프트 스페이스로 변경
+#IfWinActive ahk_exe WsaClient.exe
+
+    sc138:: ;;한영키
+        {
+            addlog("한영")
+            Send, +{Space}
+        }
+    return
+
+; ^Space::
+;     {
+;         ret:=IME_CHECK("ahk_exe WsaClient.exe")
+;         If ret=0 ;;영문
+;         {
+;             ; Send, {vk15sc138}
+;         }
+;         If ret=1 ;;한글
+;         {
+;             Send, {vk15sc138} ;;한영키
+;         }
+;     }
+; return
+
+#IfWinActive
 
 ; +Space:: SC1F2
 
@@ -316,7 +336,8 @@ ImmGetDefaultIMEWnd(hWnd)
 return
 
 ^f5::
-    채굴옮기기()
+    msg:= "절전모드해제"
+    RunWait, curl -k -d "chat_id=857175800&text=%msg%" https://api.telegram.org/bot802319057:AAF2_2iNBUEJ0lJlR5TnWrE82OxlFu5pJwY/sendMessage,, Hide
 return
 
 ; ^f9::
